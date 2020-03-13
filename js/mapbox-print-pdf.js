@@ -113,6 +113,8 @@ var PdfBuilder = (function() {
                     allowTaint: true,
                     onclone: whenCloned
                 }).then(writeCanvasToPdf, reject);
+                    
+                
             });
         };
 
@@ -257,13 +259,13 @@ var PdfBuilder = (function() {
                 checkStyle();
             });
         };
-        this.print = function(map, mapboxgl) {
+        this.print = function({map, mapboxgl, carto, cartoStyle, cardId}) {
             
             if (!map.isStyleLoaded()) {
                 
                 return new Promise(function(resolve, reject) {
                     _waitForStyleToLoad(map).then(function() {
-                        that.print(map, mapboxgl).then(resolve, reject);
+                        that.print({map, mapboxgl, carto, cartoStyle, cardId}).then(resolve, reject);
                     }, reject);
                 });
             }
@@ -285,7 +287,7 @@ var PdfBuilder = (function() {
                             });
                     });
                 };
-                mapUtils.createPrintMap(map, mapboxgl, container)
+                mapUtils.createPrintMap({map, mapboxgl, carto, cartoStyle, container, cardId})
                     .then(afterRenderMapCreate)
                     .then(resolve, reject);
             });

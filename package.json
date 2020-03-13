@@ -1,5 +1,5 @@
 {
-  "name": "mapbox-print-pdf",
+  "name": "@pirireis/mapbox-print-pdf",
   "version": "0.4.3",
   "description": "A library for printing mapbox maps as pdfs",
   "main": "js/mapbox-print-pdf.js",
@@ -7,7 +7,7 @@
     "start": "watchify-server docs/js/index.js --port 8000 --index index.html --dir docs",
     "watch-dev": "watchify docs/js/index.js -v -o docs/build/bundle.js",
     "build-demo": "browserify docs/js/index.js -o docs/build/bundle.js",
-    "build": "browserify -g uglifyify js/mapbox-print-pdf.js -o dist/mapbox-print-pdf.min.js"
+    "build": "browserify -g uglifyify js/mapbox-print-pdf.js -o dist/mapbox-print-pdf.min.js -t [babelify --presets [@babel/preset-env]]"
   },
   "repository": {
     "type": "git",
@@ -29,20 +29,29 @@
   },
   "homepage": "https://github.com/Eddie-Larsson/mapbox-print-pdf#readme",
   "dependencies": {
-    "canvg": "github:canvg/canvg",
+    "@carto/carto-vl": "git://github.com/pirireisbilisim/carto-vl.git#1.5.0",
+    "canvg": "1.5.3",
     "css-initials": "^0.2.0",
-    "html2canvas": "https://github.com/Eddie-Larsson/html2canvas/releases/download/v1.0.0-alpha-ie.10/html2canvas-1.0.0-alpha-ie.10.tgz",
-    "jspdf": "^1.3.5"
+    "html2canvas": "1.0.0-rc.5",
+    "jspdf": "^1.3.5",
+    "lodash-es": "^4.17.15"
   },
   "devDependencies": {
+    "@babel/core": "^7.8.4",
+    "@babel/preset-env": "^7.8.4",
     "@webcomponents/template": "^1.2.2",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1",
+    "babelify": "^10.0.0",
     "browserify": "^16.1.0",
-    "mapbox-gl": "^0.44.1",
+    "mapbox-gl": "^1.7.0",
     "uglifyify": "^4.0.5",
     "watchify": "^3.10.0",
     "watchify-server": "^1.0.2"
   },
   "peerDependencies": {
+    "@carto/carto-vl": "git://github.com/pirireisbilisim/carto-vl.git#1.5.0",
     "mapbox-gl": "^0.44.1"
   }
 }

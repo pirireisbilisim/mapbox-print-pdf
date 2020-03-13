@@ -1,8 +1,11 @@
 
+var {cloneDeep, isEmpty} = require('lodash-es');
 var check = require('./type-check.js');
+// var carto = require('@carto/carto-vl');
 var UNITS = require('./dimensions.js').UNITS;
 var QUIESCE_TIMEOUT = 500;
 var SCALE_UNITS = ['metric', 'imperial', 'nautical'];
+var cartoLayerLoaded = []
 
 function isValidScaleObject(value) {
     if (!check.isObject(value)) return false;
@@ -48,10 +51,11 @@ function waitForMapToRender(map) {
     var noneLoaded = false;
     return new Promise(function (resolve) {
         var quiesce = function () {
-            if (!noneLoaded || (!map.loaded() || !map.isStyleLoaded() || !map.areTilesLoaded())) {
+            if (!noneLoaded || (!map.loaded() || !map.isStyleLoaded() || !map.areTilesLoaded() || cartoLayerLoaded.includes(false))) {
                 noneLoaded = true;
                 setTimeout(quiesce, QUIESCE_TIMEOUT);
             } else {
+                cartoLayerLoaded = []
                 map.off('render', renderListener);
                 resolve(map);
             }
@@ -82,7 +86,8 @@ function addScale(map, scale, mapboxgl) {
     });
 }
 
-function createPrintMap(map, mapboxgl, container) {
+function createPrintMap({map, mapboxgl, carto, cartoStyle, container, cardId}) {
+    
     return new Promise(function (resolve, reject) {
 
         try {
@@ -98,8 +103,33 @@ function createPrintMap(map, mapboxgl, container) {
                 preserveDrawingBuffer: true
             });
             renderMap.fitBounds(map.getBounds());
+            
+            if (!isEmpty(cartoStyle)) {
+                const layers = Object.keys(cartoStyle[cardId]);
+                cartoLayerLoaded = layers.map(() => false)
+                layers.forEach((layerId, li) => {
+                    const cartoLayer = map.getLayer(layerId).implementation
+                    const sourceUrl = decodeURI(cartoLayer._source._templateURL);
+                    const metadata = cloneDeep(cartoLayer._source._metadata);
+                    const mapSource = new carto.source.MVT([sourceUrl], metadata);
 
-            resolve(renderMap);
+                    const tempViz = cloneDeep(cartoStyle[cardId][layerId]);
+                    const vizObject = new carto.Viz(tempViz);
+                    const newLayer = new carto.Layer(cartoLayer.id, mapSource, vizObject);
+
+                    const isLoaded = () => {
+                        cartoLayerLoaded[li] = true;
+                        newLayer.off('loaded', isLoaded)
+                    }
+
+                    newLayer.on('loaded', isLoaded)
+                    const beforeLayer = layers[li - 1];
+                    newLayer.addTo(renderMap, beforeLayer);
+                })
+            }
+
+            resolve(renderMap);    
+
         } catch (err) {
             reject(err);
         }
