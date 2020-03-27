@@ -1,5 +1,6 @@
 
-var {cloneDeep, isEmpty} = require('lodash-es');
+var cloneDeep = require('lodash.clonedeep');
+var isEmpty = require('lodash.isempty');
 var check = require('./type-check.js');
 // var carto = require('@carto/carto-vl');
 var UNITS = require('./dimensions.js').UNITS;
@@ -89,7 +90,7 @@ function addScale(map, scale, mapboxgl) {
 function createPrintMap({map, mapboxgl, carto, cartoStyle, container, cardId}) {
     
     return new Promise(function (resolve, reject) {
-
+        
         try {
             var renderMap = new mapboxgl.Map({
                 container: container,
@@ -102,7 +103,7 @@ function createPrintMap({map, mapboxgl, carto, cartoStyle, container, cardId}) {
                 attributionControl: false,
                 preserveDrawingBuffer: true
             });
-            renderMap.fitBounds(map.getBounds());
+            renderMap.fitBounds(map.getBounds().toArray());
             
             if (!isEmpty(cartoStyle)) {
                 const layers = Object.keys(cartoStyle[cardId]);
