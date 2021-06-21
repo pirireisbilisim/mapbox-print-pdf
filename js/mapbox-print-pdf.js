@@ -259,13 +259,13 @@ var PdfBuilder = (function() {
                 checkStyle();
             });
         };
-        this.print = function({map, mapboxgl, carto, cartoStyle, cardId}) {
+        this.print = function({map, mapboxgl, carto, cartoStyle, cardId, appConfigs}) {
             
             if (!map.isStyleLoaded()) {
                 
                 return new Promise(function(resolve, reject) {
                     _waitForStyleToLoad(map).then(function() {
-                        that.print({map, mapboxgl, carto, cartoStyle, cardId}).then(resolve, reject);
+                        that.print({map, mapboxgl, carto, cartoStyle, cardId, appConfigs}).then(resolve, reject);
                     }, reject);
                 });
             }
@@ -287,7 +287,7 @@ var PdfBuilder = (function() {
                             });
                     });
                 };
-                mapUtils.createPrintMap({map, mapboxgl, carto, cartoStyle, container, cardId})
+                mapUtils.createPrintMap({map, mapboxgl, carto, cartoStyle, container, cardId, appConfigs})
                     .then(afterRenderMapCreate)
                     .then(resolve, reject);
             });

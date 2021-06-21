@@ -87,10 +87,9 @@ function addScale(map, scale, mapboxgl) {
     });
 }
 
-function createPrintMap({map, mapboxgl, carto, cartoStyle, container, cardId}) {
+function createPrintMap({map, mapboxgl, carto, cartoStyle, container, cardId, appConfigs}) {
     
     return new Promise(function (resolve, reject) {
-        
         try {
             var renderMap = new mapboxgl.Map({
                 container: container,
@@ -101,7 +100,48 @@ function createPrintMap({map, mapboxgl, carto, cartoStyle, container, cardId}) {
                 pitch: map.getPitch(),
                 interactive: false,
                 attributionControl: false,
-                preserveDrawingBuffer: true
+                preserveDrawingBuffer: true,
+                transformRequest: (url, resourceType) => {
+                    if (
+                        resourceType === 'Tile' &&
+                        url.startsWith(appConfigs.BASE_API_URL)
+                    ) {
+                        const [
+                            ,
+                            ,
+                            token,
+                            z,
+                            x,
+                            y,
+                            databaseId,
+                            query,
+                            geometryType,
+                            simplifyZoom,
+                            uniqueColumn,
+                            cache,
+                        ] = url.replace(appConfigs.BASE_API_URL, '').split('/');
+                        return {
+                            method: 'POST',
+                            url: `${appConfigs.BASE_API_URL}/map`,
+                            body: JSON.stringify({
+                                z,
+                                x,
+                                y,
+                                databaseId,
+                                query: decodeURIComponent(query),
+                                geometryType,
+                                simplifyZoom,
+                                uniqueColumn,
+                                cache,
+                            }),
+                            headers: {
+                                'content-type': 'application/json',
+                                Authorization: `Bearer ${token}`,
+                            },
+                            credentials: 'include',
+                        };
+                    }
+                }
             });
             renderMap.fitBounds(map.getBounds().toArray());
             
